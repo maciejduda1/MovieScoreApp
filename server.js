@@ -5,7 +5,7 @@ const path = require('path');
 const PORT = process.env.PORT || 5000;
 
 const app = express();
-console.log(__dirname);
+let newAppUser = new Object;
 
 app.set('view engine', 'pug')
 app.set('views', path.join(__dirname + '/views'))
@@ -26,18 +26,16 @@ app.listen(PORT, function() {
     console.log('Node app is running on port', app.get('port'));
   });
 
-/*
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://mdtest:wow123@ds225308.mlab.com:25308/firstdatabasetest', {
- //   useMongoClient: true
+    useMongoClient: true
 });
 
 //new user Schema
 const userSchema = new Schema({
-    name: String,
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    admin: Boolean,
+    movies: [],
     created_at: Date,
     updated_at: Date
 });
@@ -65,6 +63,37 @@ userSchema.pre('save', function(next) {
 
 //model based on userSchema
 const User = mongoose.model('User', userSchema);
+
+const userCreation = function(req, res, next){
+    console.log(req.query.password + ' i ' + req.query.confirmPassword);
+    if (req.query.password === req.query.confirmPassword){
+        newAppUser = new User({
+            username: req.query.username,
+            password: req.query.password
+        });
+    }
+    else {
+        console.log('niepoprawne hasło');
+    }
+    next();
+}
+
+app.post('/app-page', userCreation, function(req, res){
+    res.render('app-page.pug');
+})
+
+const authentication = function(req, res, next){
+    
+}
+
+app.get('/app-page', authentication, function(req, res){
+    res.render('app-page.pug');
+})
+
+
+
+
+
 
 /*
 //instancje klasy User

@@ -1,10 +1,10 @@
 extends home-site.pug
 
 block content
-    form(method='POST' action='/register')
+    form(method='POST' action='/app-page')
         div.form-group
             label(for='name') UserName:
-                input#name.form-control(type='text', placeholder='Username here' name='name')
+                input#name.form-control(type='text', placeholder='Username here' name='username')
         div.form-group
             label(for='pw') Password:
                 input#pw.form-control(type='password', placeholder='Password here' name='password')
