@@ -4,16 +4,17 @@ const express = require('express');
 const app = express();
 
 app.set('view engine', 'pug');
-app.set('views', '/views');
+app.set('views', __dirname + '/views');
+
+app.use(express.static( __dirname ));
 
 app.get( '/', function(req, res){
-    res.send('Kupppa');
-  //  res.render('home-site'); 
+    res.render('home-site'); 
 });
 
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://mdtest:wow123@ds225308.mlab.com:25308/firstdatabasetest', {
-    useMongoClient: true
+ //   useMongoClient: true
 });
 
 //new user Schema
