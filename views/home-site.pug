@@ -7,11 +7,6 @@ html
         h2 Author: Maciej Duda
         block content
             h1.app-title Logg in to see your page
-            button(
-                type=submit
-                form(action="./registration.pug", method="get")
-            ) Register
-            button(
-                type=submit
-                form(action="./loggin.pug", method="get")
-            ) LoggIn
+            div.buttons
+                button(onclick="location.href='/register'") Register
+                button(onclick="location.href='/loggin'") LoggIn
