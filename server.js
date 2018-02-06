@@ -6,7 +6,7 @@ const app = express();
 app.set('view engine', 'pug');
 app.set('views', __dirname + '/views');
 
-app.get('/', function(req, res){
+app.get(__dirname + '/', function(req, res){
     res.render('views/home-site');
 })
 
