@@ -1,0 +1,17 @@
+doctype html
+html
+    head
+        title="home page"
+    body
+        h1 My Movie List App
+        h2 Author: Maciej Duda
+        block content
+            h1.app-title Logg in to see your page
+            button(
+                type=submit
+                form(action="./registration.pug", method="get")
+            ) Register
+            button(
+                type=submit
+                form(action="./loggin.pug", method="get")
+            ) LoggIn
