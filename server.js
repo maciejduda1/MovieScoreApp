@@ -7,11 +7,9 @@ app.set('view engine', 'pug');
 app.set('views', '/views');
 
 app.get( '/', function(req, res){
-    res,send('Kupppa');
+    res.send('Kupppa');
   //  res.render('home-site'); 
-})
-
-
+});
 
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://mdtest:wow123@ds225308.mlab.com:25308/firstdatabasetest', {
