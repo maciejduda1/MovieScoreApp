@@ -2,10 +2,11 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const express = require('express');
 const path = require('path');
+const PORT = process.env.PORT || 5000;
 
 const app = express();
 
-app.set('port', (process.env.PORT || 5000));
+
 
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname + 'views'));
@@ -14,7 +15,7 @@ app.get( '/', function(req, res){
     res.render('home-site'); 
 });
 
-app.listen(app.get('port'), function() {
+app.listen(PORT, function() {
     console.log('Node app is running on port', app.get('port'));
   });
 
