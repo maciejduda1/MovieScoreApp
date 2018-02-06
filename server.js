@@ -15,7 +15,8 @@ app.get( '/', function(req, res){
 app.listen(app.get('port'), function() {
     console.log('Node app is running on port', app.get('port'));
   });
-
+  
+/*
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://mdtest:wow123@ds225308.mlab.com:25308/firstdatabasetest', {
  //   useMongoClient: true
