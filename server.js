@@ -6,8 +6,9 @@ const app = express();
 app.set('view engine', 'pug');
 app.set('views', '/views');
 
-app.get( 'https://vast-inlet-10373.herokuapp.com/', function(req, res){
-    res.render('home-site');
+app.get( '/', function(req, res){
+    res,send('Kupppa');
+  //  res.render('home-site'); 
 })
 
 
