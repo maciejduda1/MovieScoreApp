@@ -4,10 +4,10 @@ const express = require('express');
 const app = express();
 
 app.set('view engine', 'pug');
-app.set('views', __dirname + '/views');
+app.set('views', '/views');
 
-app.get(__dirname + '/', function(req, res){
-    res.render('views/home-site');
+app.get( '/', function(req, res){
+    res.render('home-site');
 })
 
 
