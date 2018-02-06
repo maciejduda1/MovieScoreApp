@@ -6,7 +6,7 @@ const app = express();
 app.set('view engine', 'pug');
 app.set('views', '/views');
 
-app.get( '/', function(req, res){
+app.get( 'https://vast-inlet-10373.herokuapp.com/', function(req, res){
     res.render('home-site');
 })
 
