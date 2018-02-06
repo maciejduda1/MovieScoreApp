@@ -5,14 +5,13 @@ const path = require('path');
 const PORT = process.env.PORT || 5000;
 
 const app = express();
-
-
+console.log(__dirname);
 
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname + 'views'));
 
 app.get( '/', function(req, res){
-    res.render('home-site'); 
+    res.render('home-site.pug'); 
 });
 
 app.listen(PORT, function() {
