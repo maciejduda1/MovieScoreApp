@@ -1,5 +1,16 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const express = require('express');
+const app = express();
+
+app.set('view engine', 'pug');
+app.set('views', './views');
+
+app.get('/', function(req, res){
+    res.render('views/home-site');
+})
+
+
 
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://mdtest:wow123@ds225308.mlab.com:25308/firstdatabasetest', {
@@ -40,6 +51,7 @@ userSchema.pre('save', function(next) {
 //model based on userSchema
 const User = mongoose.model('User', userSchema);
 
+/*
 //instancje klasy User
 const kenny = new User({
     name: 'Kenny',
@@ -154,3 +166,4 @@ Promise.all([kenny.save(), mark.save(), benny.save()])
     .then(findKennyAndDelete)
     .then(findBennyAndRemove)
     .catch(console.log.bind(console))
+*/
