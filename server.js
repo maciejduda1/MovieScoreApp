@@ -7,7 +7,7 @@ app.set('view engine', 'pug');
 app.set('views', __dirname + '/views');
 
 app.get('/', function(req, res){
-    res.render('/home-site');
+    res.render('views/home-site');
 })
 
 
