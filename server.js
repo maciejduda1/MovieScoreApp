@@ -3,14 +3,18 @@ const Schema = mongoose.Schema;
 const express = require('express');
 const app = express();
 
-app.set('view engine', 'pug');
-app.set('views', __dirname + '/views');
+app.set('port', (process.env.PORT || 5000));
 
-app.use(express.static( __dirname ));
+app.set('view engine', 'pug');
+app.set('views', './views');
 
 app.get( '/', function(req, res){
     res.render('home-site'); 
 });
+
+app.listen(app.get('port'), function() {
+    console.log('Node app is running on port', app.get('port'));
+  });
 
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://mdtest:wow123@ds225308.mlab.com:25308/firstdatabasetest', {
