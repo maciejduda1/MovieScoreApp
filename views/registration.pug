@@ -3,12 +3,12 @@ extends home-site.pug
 block content
     form(method='POST' action='/app-page')
         div.form-group
-            label(for='name') UserName:
-                input#name.form-control(type='text', placeholder='Username here' name='username')
+            label UserName:  
+                input(type='text', name='username', value="" )
         div.form-group
-            label(for='pw') Password:
-                input#pw.form-control(type='password', placeholder='Password here' name='password')
+            label Password:  
+                input(type='password', name='password', value="")
         div.form-group
-            label(for='pw2') Confirm Password:
-                input#pw2.form-control(type='password', placeholder='Repeat password' name='confirmPassword')
-                button.btn.btn-primary(type='submit') Sign up
+            label Confirm Password:  
+                input(type='password', name='confirmPassword', value="")
+        input(type='submit', value='Sign up') 

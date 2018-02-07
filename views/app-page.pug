@@ -3,4 +3,36 @@ html
     head
         title="App Page"
     body
-        h1.app-title #{name} : My movies to watch list!
+        h1.app-title  Hello! #{name}. Tell us what movies you like!!
+        block add
+            form(action="/addmovie", method="post")
+                input(
+                    type = "text",
+                    name = "movie_title",
+                    value = "",
+                    placeholder = "movie title"
+                )
+                input(
+                    type = "number",
+                    value = "",
+                    name = "movie_score",
+                    placeholder = "movie score "
+                )
+                input(
+                    type = "submit",
+                    value = "Submit"
+                )
+        block table
+        table
+            thead
+                tr
+                    th Film
+                    th Ocena
+            tbody
+                - var contentTable = movies;
+                - console.log('pug ' + movies.length);
+                each item in contentTable
+                    tr 
+                        td= item.title
+                        td= item.score
+        

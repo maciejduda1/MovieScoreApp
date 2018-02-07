@@ -1,7 +1,7 @@
 extends home-site.pug
 
 block content
-    form(method='POST' action='/register')
+    form(method='GET' action='/app-page')
         div.form-group
             label(for='name') UserName:
                 input#name.form-control(type='text', placeholder='Username' name='username')

@@ -3,9 +3,28 @@ const Schema = mongoose.Schema;
 const express = require('express');
 const path = require('path');
 const PORT = process.env.PORT || 5000;
+const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
+
+//bycrypt config
+const saltRounds = 10;
+const myPlaintextPassword = 's0/\/\P4$$w0rD';
+const someOtherPlaintextPassword = 'not_bacon';
+
+//Moje boje
+let newAppUser = new Object;
+let noData = new String;
+let responseData = new Object;
+
+mongoose.Promise = global.Promise;
+mongoose.connect('mongodb://mdtest:wow123@ds225308.mlab.com:25308/firstdatabasetest', {
+ //   useMongoClient: true
+});
 
 const app = express();
-let newAppUser = new Object;
+
+app.use(bodyParser.json()); 
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.set('view engine', 'pug')
 app.set('views', path.join(__dirname + '/views'))
@@ -26,11 +45,6 @@ app.listen(PORT, function() {
     console.log('Node app is running on port', app.get('port'));
   });
 
-mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://mdtest:wow123@ds225308.mlab.com:25308/firstdatabasetest', {
-    useMongoClient: true
-});
-
 //new user Schema
 const userSchema = new Schema({
     username: { type: String, required: true, unique: true },
@@ -38,7 +52,7 @@ const userSchema = new Schema({
     movies: [],
     created_at: Date,
     updated_at: Date
-});
+}, {collection: 'user-data'});
 
 //Mongoose schema method
 userSchema.methods.manify = function(next) {
@@ -49,6 +63,19 @@ userSchema.methods.manify = function(next) {
 
 //pre-save method
 userSchema.pre('save', function(next) {
+    let user = this;
+    console.log('user.password  ' + user.password);
+    bcrypt.hash(user.password, 10, function (err, hash){
+        if (err){
+            return next(err);
+        }
+        user.password = hash;
+        console.log('user.password ' + user.password);
+    })
+
+    
+    console.log('user password ' + user.password );
+    
     //pobranie aktualnego czasu
     const currentDate = new Date();
 
@@ -65,35 +92,72 @@ userSchema.pre('save', function(next) {
 const User = mongoose.model('User', userSchema);
 
 const userCreation = function(req, res, next){
-    console.log(req.query.password + ' i ' + req.query.confirmPassword);
-    if (req.query.password === req.query.confirmPassword){
+    if (req.body.password === req.body.confirmPassword){
         newAppUser = new User({
-            username: req.query.username,
-            password: req.query.password
+            username: req.body.username,
+            password: req.body.password
         });
+        newAppUser.save();
     }
     else {
         console.log('niepoprawne hasło');
+        res.render('registration.pug');
+        return 
     }
     next();
 }
 
 app.post('/app-page', userCreation, function(req, res){
+   // console.log(req.body.password + ' i ' + req.body.confirmPassword);
     res.render('app-page.pug');
 })
 
+const movieAdd = function(req, res, next){
+    const newMovie = {title : req.body.movie_title , score : req.body.movie_score};
+    console.log('responseData[0].username w movieAdd' + responseData.username)
+    let theUserWithMovies = User.findOne({username : responseData.username}, function(err, user){
+        if (err) throw err;
+        user.movies.push(newMovie);
+       // user.movies = user.movies + newMovie;
+        user.save();
+    })
+    next();
+}   
+
+app.post('/addmovie', movieAdd, function(req, res){
+    res.render('app-page.pug', {
+        name : responseData.username
+    });
+})
+
+
 const authentication = function(req, res, next){
-    
+    let userData = User.findOne({username: req.query.username, password: req.query.password}, function(err, res){
+        if (err) throw err;
+        if (res) {
+            noData = 'no';
+            responseData = res;
+            return next();
+        } else {
+            console.log('no matching result  ' + res);
+            noData = 'yes'
+            return next();
+        }
+    });  
 }
 
 app.get('/app-page', authentication, function(req, res){
-    res.render('app-page.pug');
+    if (noData == 'no'){
+        console.log('responseData.movies ' + responseData.movies.length);
+        res.render('app-page.pug', {
+        name : req.query.username,
+        movies : responseData.movies
+        });
+    }
+    else {
+        res.redirect('/');
+    }
 })
-
-
-
-
-
 
 /*
 //instancje klasy User
