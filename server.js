@@ -107,6 +107,22 @@ const userCreation = function(req, res, next){
     next();
 }
 
+const getNewData = function(req, res, next){
+    let userData = User.findOne({username: req.body.username, password: req.body.password}, function(err, res){
+        if (err) throw err;
+        if (res) {
+            noData = 'no';
+            responseData = res;
+            return next();
+        } else {
+            console.log('no matching result  ' + res);
+            noData = 'yes'
+            return next();
+        }
+    });  
+};
+
+
 app.post('/app-page', userCreation, function(req, res){
    // console.log(req.body.password + ' i ' + req.body.confirmPassword);
     res.render('app-page.pug');
@@ -122,14 +138,11 @@ const movieAdd = function(req, res, next){
         user.save();
     })
     next();
-}   
+};   
 
-app.post('/addmovie', movieAdd, function(req, res){
-    res.render('app-page.pug', {
-        name : responseData.username
-    });
+app.post('/addmovie', movieAdd, getNewData, function(req, res){
+    res.redirect('back');
 })
-
 
 const authentication = function(req, res, next){
     let userData = User.findOne({username: req.query.username, password: req.query.password}, function(err, res){
@@ -151,13 +164,27 @@ app.get('/app-page', authentication, function(req, res){
         console.log('responseData.movies ' + responseData.movies.length);
         res.render('app-page.pug', {
         name : req.query.username,
-        movies : responseData.movies
+        movies : responseData.movies,
+        deleteMovie: () => findMovieAndDelete()
         });
     }
     else {
         res.redirect('/');
     }
 })
+
+const findMovieAndDelete = function(thisUser, thisMovie) {
+    return User.findOne({ username: thisUser, movie: thisMovie })
+        .then(function(user) {
+            console.log('user ' + user);
+/*            if (user.movies.title == thisMovie.title){
+                return user.remove(function() {
+                    console.log('User successfully deleted');
+                             }); 
+            }*/
+        })
+}
+
 
 /*
 //instancje klasy User

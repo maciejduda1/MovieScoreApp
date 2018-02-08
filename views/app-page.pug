@@ -28,11 +28,19 @@ html
                 tr
                     th Film
                     th Ocena
+                    th Delete
             tbody
                 - var contentTable = movies;
                 - console.log('pug ' + movies.length);
-                each item in contentTable
-                    tr 
+                - function Delete(item) {
+                -    console.log('item  ' + item);
+                -    deleteMovie(name, item);
+                -    return console.log('pug item ' + item); 
+                - //document.getElementById(item).deleteRow(item);
+                - }
+                each item, index in contentTable
+                    tr#index
                         td= item.title
                         td= item.score
-        
+                        td 
+                            button( type= "button", onclick= Delete(this.item)) Delete
