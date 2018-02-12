@@ -1,0 +1,22 @@
+extends app-page.pug
+
+block add
+    - var thisId = id;
+    h2 You are editting movie: #{movie} with score: #{score}
+    form(action="/edit/" + thisId, method="post")
+                input(
+                    type = "text",
+                    name = "movie_title",
+                    value = "",
+                    placeholder = "new movie title"
+                )
+                input(
+                    type = "number",
+                    value = "",
+                    name = "movie_score",
+                    placeholder = "new movie score "
+                )
+                input(
+                    type = "submit",
+                    value = "Submit"
+                )
