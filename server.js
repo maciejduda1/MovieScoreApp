@@ -5,6 +5,7 @@ const path = require('path');
 const PORT = process.env.PORT || 5000;
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
+const uuidv4 = require('uuid/v4');
 
 //bycrypt config
 const saltRounds = 10;
@@ -42,7 +43,7 @@ app.get('/loggin', function(req,res){
 })
 
 app.listen(PORT, function() {
-    console.log('Node app is running on port', app.get('port'));
+    console.log('Node app is running on port', PORT);
   });
 
 //new user Schema
@@ -64,14 +65,14 @@ userSchema.methods.manify = function(next) {
 //pre-save method
 userSchema.pre('save', function(next) {
     let user = this;
-    console.log('user.password  ' + user.password);
+  //  console.log('user.password  ' + user.password);
     bcrypt.hash(user.password, 10, function (err, hash){
         if (err){
             return next(err);
         }
         user.password = hash;
-        console.log('user.password ' + user.password);
-    })
+     //   console.log('user.password ' + user.password);
+    });
 
     
     console.log('user password ' + user.password );
@@ -91,26 +92,80 @@ userSchema.pre('save', function(next) {
 //model based on userSchema
 const User = mongoose.model('User', userSchema);
 
+//
+// New User Creation part:
+//
 const userCreation = function(req, res, next){
     if (req.body.password === req.body.confirmPassword){
         newAppUser = new User({
             username: req.body.username,
             password: req.body.password
         });
-        newAppUser.save();
+        newAppUser.save().then(()=> next());
     }
     else {
         console.log('niepoprawne hasło');
         res.render('registration.pug');
         return 
     }
-    next();
+ //   next();
 }
 
+const authentication2 = function(req, res, next){
+    appendUserData(req.body.username, req.body.password).then(() => next())
+};
+
+app.post('/app-page', userCreation, authentication2, function(req, res){
+    /*
+    const obj = {
+        name : req.body.username,
+        movies : responseData.movies
+    };
+    */
+    res.render('loggin.pug');
+})
+
+//
+// Logg In Part
+//
+
+const authentication = function(req, res, next){
+    appendUserData(req.query.username, req.query.password).then(() => next())
+};
+
+app.get('/app-page', authentication, function(req, res){
+    if (noData == 'no'){
+        console.log('responseData.movies ' + responseData.movies.length);
+        res.render('app-page.pug', {
+        name : req.query.username,
+        movies : responseData.movies,
+        });
+    }
+    else {
+        res.redirect('/');
+    }
+})
+
+//
+// Movie Add Part:
+//
+
+const movieAdd = function(req, res, next){
+    const newMovie = {title : req.body.movie_title, score : req.body.movie_score, movieId: uuidv4()};
+    console.log('responseData.username w movieAdd ' + responseData.username);
+    User.findOne({username : responseData.username}, function(err, user){
+        if (err) throw err;
+        user.movies.push(newMovie);
+       // user.movies = user.movies + newMovie;
+        user.save().then(() => next());
+    })
+};   
+
 const getNewData = function(req, res, next){
-    let userData = User.findOne({username: req.body.username, password: req.body.password}, function(err, res){
+    let userData = User.findOne({username: responseData.username, password: responseData.password}, function(err, res){
         if (err) throw err;
         if (res) {
+            console.log('We have a response!');
             noData = 'no';
             responseData = res;
             return next();
@@ -122,69 +177,90 @@ const getNewData = function(req, res, next){
     });  
 };
 
-
-app.post('/app-page', userCreation, function(req, res){
-   // console.log(req.body.password + ' i ' + req.body.confirmPassword);
-    res.render('app-page.pug');
-})
-
-const movieAdd = function(req, res, next){
-    const newMovie = {title : req.body.movie_title , score : req.body.movie_score};
-    console.log('responseData[0].username w movieAdd' + responseData.username)
-    let theUserWithMovies = User.findOne({username : responseData.username}, function(err, user){
-        if (err) throw err;
-        user.movies.push(newMovie);
-       // user.movies = user.movies + newMovie;
-        user.save();
-    })
-    next();
-};   
-
 app.post('/addmovie', movieAdd, getNewData, function(req, res){
     res.redirect('back');
 })
 
-const authentication = function(req, res, next){
-    let userData = User.findOne({username: req.query.username, password: req.query.password}, function(err, res){
+//
+// Movie Delete:
+//
+
+app.get('/remove/:movieId', function (req, res) {
+    return User.findOne({username : responseData.username}, function(err, user){
+        if (err) throw err;
+        user.movies = user.movies.filter(movie => movie.movieId !== req.params.movieId);
+      /*  user.save().then(() => res.render('app-page.pug', {
+            name: responseData.username,
+            movies: user.movies
+        })); */
+        user.save().then(() => res.redirect('back'));
+    })
+})
+
+//
+// Movie Edit
+//
+app.get('/edit/:movieId', function(req, res){
+    return User.findOne({username : responseData.username}, function(err, user){
+        if (err) throw err;
+        user.movies.map((movie) => {
+            if (movie.movieId == req.params.movieId){
+                res.render('edit.pug', {
+                    movies: responseData.movies,
+                    movie: movie.title,
+                    score: movie.score,
+                    id: movie.movieId
+                })
+            }
+        })
+    });
+})
+
+const postEdition = function(req, res, next){
+    return User.findOne({username: responseData.username}, function(err, user){
+        if (err) throw err;
+        user.movies = user.movies.map(movie => {
+           // console.log('request in post - req.params.movieId ' + req.params.movieId);
+           // console.log('request movie.movieId ' + movie.movieId);
+            if (movie.movieId == req.params.movieId){
+              //  console.log('req.body.movie_title ' + req.body.movie_title);
+              //  console.log('movie title: ' + movie.title);
+                movie.title = req.body.movie_title;
+                movie.score = req.body.movie_score;
+              //  console.log('movie title po zmianie: ' + movie.title);
+            }
+            return movie;
+        });
+        console.log('user movies: ' + user.movies);
+        user.save().then(() => next());
+    });
+};
+
+app.post('/edit/:movieId', postEdition, getNewData, function(req, res){
+    res.render('app-page.pug', {
+        name : responseData.username,
+        movies : responseData.movies
+    })
+})
+
+//
+// Functions
+//
+
+function appendUserData(username, password) {
+    return User.findOne({username, password}, function(err, res) {
+        console.log('appendUser Data: ' + username + ' ' + password);
         if (err) throw err;
         if (res) {
             noData = 'no';
             responseData = res;
-            return next();
+            console.log('res dotarł do responseData');
         } else {
-            console.log('no matching result  ' + res);
+            console.log('no matching result in appendUserData ' + res);
             noData = 'yes'
-            return next();
         }
-    });  
+    });
 }
-
-app.get('/app-page', authentication, function(req, res){
-    if (noData == 'no'){
-        console.log('responseData.movies ' + responseData.movies.length);
-        res.render('app-page.pug', {
-        name : req.query.username,
-        movies : responseData.movies,
-        deleteMovie: () => findMovieAndDelete()
-        });
-    }
-    else {
-        res.redirect('/');
-    }
-})
-
-const findMovieAndDelete = function(thisUser, thisMovie) {
-    return User.findOne({ username: thisUser, movie: thisMovie })
-        .then(function(user) {
-            console.log('user ' + user);
-/*            if (user.movies.title == thisMovie.title){
-                return user.remove(function() {
-                    console.log('User successfully deleted');
-                             }); 
-            }*/
-        })
-}
-
 
 /*
 //instancje klasy User
