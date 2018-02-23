@@ -14,7 +14,7 @@ const someOtherPlaintextPassword = 'not_bacon';
 
 //Moje boje
 let newAppUser = new Object;
-let noData = new String;
+let noData = new Boolean;
 let responseData = new Object;
 
 mongoose.Promise = global.Promise;
@@ -46,11 +46,17 @@ app.listen(PORT, function() {
     console.log('Node app is running on port', PORT);
   });
 
-//new user Schema
+//new user Schema and movie subSchema
+const moviesSchema = new Schema({
+    title : { type: String, required: true },
+    score : { type: Number, required: true },
+    movieId: { type: 'String', required: true, unique: true },
+});
+
 const userSchema = new Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    movies: [],
+    movies: [moviesSchema],
     created_at: Date,
     updated_at: Date
 }, {collection: 'user-data'});
@@ -74,7 +80,6 @@ userSchema.pre('save', function(next) {
      //   console.log('user.password ' + user.password);
     });
 
-    
     console.log('user password ' + user.password );
     
     //pobranie aktualnego czasu
@@ -134,7 +139,7 @@ const authentication = function(req, res, next){
 };
 
 app.get('/app-page', authentication, function(req, res){
-    if (noData == 'no'){
+    if (noData == false){
         console.log('responseData.movies ' + responseData.movies.length);
         res.render('app-page.pug', {
         name : req.query.username,
@@ -151,6 +156,12 @@ app.get('/app-page', authentication, function(req, res){
 //
 
 const movieAdd = function(req, res, next){
+    User.findOne({ username : responseData.username }, function(err, user) {
+        if (err) throw err;
+        user.movies.push({ title: req.body.movie_title, score: req.body.movie_score, movieId: uuidv4()});
+        user.save().then(() => next());
+    });
+/*
     const newMovie = {title : req.body.movie_title, score : req.body.movie_score, movieId: uuidv4()};
     console.log('responseData.username w movieAdd ' + responseData.username);
     User.findOne({username : responseData.username}, function(err, user){
@@ -159,6 +170,7 @@ const movieAdd = function(req, res, next){
        // user.movies = user.movies + newMovie;
         user.save().then(() => next());
     })
+*/
 };   
 
 const getNewData = function(req, res, next){
@@ -166,12 +178,12 @@ const getNewData = function(req, res, next){
         if (err) throw err;
         if (res) {
             console.log('We have a response!');
-            noData = 'no';
+            noData = false;
             responseData = res;
             return next();
         } else {
             console.log('no matching result  ' + res);
-            noData = 'yes'
+            noData = true
             return next();
         }
     });  
@@ -185,9 +197,9 @@ app.post('/addmovie', movieAdd, getNewData, function(req, res){
 // Movie Delete:
 //
 
-app.get('/remove/:movieId', function (req, res) {
-    return User.findOne({username : responseData.username}, function(err, user){
-        if (err) throw err;
+app.get('/remove/:movieId', function (req, res) { 
+   return User.findOne({username : responseData.username}, function(err, user){
+       if (err) throw err;
         user.movies = user.movies.filter(movie => movie.movieId !== req.params.movieId);
       /*  user.save().then(() => res.render('app-page.pug', {
             name: responseData.username,
@@ -200,6 +212,7 @@ app.get('/remove/:movieId', function (req, res) {
 //
 // Movie Edit
 //
+
 app.get('/edit/:movieId', function(req, res){
     return User.findOne({username : responseData.username}, function(err, user){
         if (err) throw err;
@@ -231,7 +244,7 @@ const postEdition = function(req, res, next){
             }
             return movie;
         });
-        console.log('user movies: ' + user.movies);
+        console.log('user movies: ' + user.movies[0]);
         user.save().then(() => next());
     });
 };
@@ -248,6 +261,15 @@ app.post('/edit/:movieId', postEdition, getNewData, function(req, res){
 //
 
 function appendUserData(username, password) {
+    return User.findOne({username, password}).then((res) => {
+        noData = false;
+        responseData = res;
+        return responseData;
+    })
+}
+
+/*
+function appendUserData(username, password) {
     return User.findOne({username, password}, function(err, res) {
         console.log('appendUser Data: ' + username + ' ' + password);
         if (err) throw err;
@@ -261,7 +283,7 @@ function appendUserData(username, password) {
         }
     });
 }
-
+*/
 /*
 //instancje klasy User
 const kenny = new User({
