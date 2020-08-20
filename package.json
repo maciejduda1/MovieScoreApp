@@ -10,7 +10,7 @@
   "author": "Maciej Duda",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^1.0.3",
+    "bcrypt": "^5.0.0",
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "mongoose": "^5.0.3",
